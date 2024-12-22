@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knapsack Solver</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            color: #333;
+        }
+    
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+    
+        form {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    
+        button {
+            background-color: #3498db;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+        }
+    
+        button:hover {
+            background-color: #2980b9;
+        }
+    
+        .item-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+    
+        .item-row input {
+            flex: 1;
+            min-width: 100px;
+        }
+    
+        .item-row button {
+            flex: 0 0 auto;
+            width: auto;
+        }
+    
+        #items-container {
+            margin: 10px 0;
+        }
+    
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+    
+        .form-buttons button {
+            width: auto;
+            margin: 0;
+        }
+    </style>
+    
+    <script>
+        // Ajouter un nouvel item
+        function addItem(weight = '', profit = '', required = false, name = '') {
+            const container = document.getElementById('items-container');
+            const index = container.children.length;
+
+            const itemHTML = 
+                `<div id="item_${index}" class="item-row">
+                    <label>Item ${index + 1}:</label>
+                    <input type="text" name="names" placeholder="Name" value="${name}">
+                    <input type="number" name="weights" placeholder="Charge" value="${weight}" required>
+                    <input type="number" name="profits" placeholder="Profit" value="${profit}" required>
+                    <label>
+                        <input type="checkbox" name="required_items" value="${index}" ${required ? 'checked' : ''}>
+                        Required
+                    </label>
+                    <button type="button" onclick="removeItem(${index})">Remove Item</button>
+                </div>`;
+            container.insertAdjacentHTML('beforeend', itemHTML);
+        }
+
+        // Retirer un item
+        function removeItem(index) {
+            const item = document.getElementById(`item_${index}`);
+            item.remove();
+        }
+
+        // Charger les données sauvegardées
+        function loadForm() {
+            const capacity = localStorage.getItem('knapsack_capacity');
+            const weights = JSON.parse(localStorage.getItem('knapsack_weights') || '[]');
+            const profits = JSON.parse(localStorage.getItem('knapsack_profits') || '[]');
+            const requiredItems = JSON.parse(localStorage.getItem('knapsack_required_items') || '[]');
+            const names = JSON.parse(localStorage.getItem('knapsack_names') || '[]');
+
+            if (capacity) {
+                document.querySelector('input[name="capacity"]').value = capacity;
+            }
+            weights.forEach((weight, i) => addItem(weight, profits[i], requiredItems[i], names[i]));
+        }
+
+        // Sauvegarder les données avant soumission
+        function saveForm() {
+            const capacity = document.querySelector('input[name="capacity"]').value;
+            const weights = Array.from(document.querySelectorAll('input[name="weights"]')).map(el => el.value);
+            const profits = Array.from(document.querySelectorAll('input[name="profits"]')).map(el => el.value);
+            const requiredItems = Array.from(document.querySelectorAll('input[name="required_items"]')).map(el => el.checked);
+            const names = Array.from(document.querySelectorAll('input[name="names"]')).map(el => el.value);
+
+            localStorage.setItem('knapsack_capacity', capacity);
+            localStorage.setItem('knapsack_weights', JSON.stringify(weights));
+            localStorage.setItem('knapsack_profits', JSON.stringify(profits));
+            localStorage.setItem('knapsack_required_items', JSON.stringify(requiredItems));
+            localStorage.setItem('knapsack_names', JSON.stringify(names));
+        }
+
+        // Afficher temporairement le message d'erreur
+        function displayTemporaryError() {
+            const errorMessage = document.getElementById('error-message');
+            if (errorMessage) {
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 5000); // Masquer après 5 secondes
+            }
+        }
+
+        window.onload = () => {
+            loadForm();
+            displayTemporaryError(); // Appeler cette fonction pour le message d'erreur
+        };
+    </script>
+</head>
+<body>
+    <h1>Knapsack Problem Solver</h1>
+    <form method="post" onsubmit="saveForm()">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div id="items-container"></div>
+        <button type="button" onclick="addItem()">Add Item</button>
+        <button type="submit">Solve</button>
+    </form>
+    {% if error_message %}
+        <p id="error-message" style="color: red;">{{ error_message }}</p>
+    {% endif %}
+</body>
+</html>

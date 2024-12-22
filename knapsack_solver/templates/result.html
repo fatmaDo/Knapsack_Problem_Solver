@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knapsack Solution</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        ul {
+            max-width: 600px;
+            margin: 20px auto;
+            padding-left: 40px;
+        }
+
+        canvas {
+            display: block;
+            margin: 20px auto;
+        }
+
+        button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var labels = JSON.parse('{{ labels|safe }}'); 
+            var data = JSON.parse('{{ data|safe }}');
+            var weights = JSON.parse('{{ weights|safe }}'); // Pass the weights data for distribution chart
+
+            var ctx1 = document.getElementById('myChart').getContext('2d');
+            var myPieChart = new Chart(ctx1, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+
+                        label: 'Profit Distribution',
+                        data: data,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    width: 400,
+                    height: 300
+                }
+            });
+
+            var ctx2 = document.getElementById('weightChart').getContext('2d');
+            var myWeightChart = new Chart(ctx2, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+
+                        label: 'Weight Distribution',
+                        data: weights,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    width: 400,
+                    height: 300
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Knapsack Problem Solution</h1>
+    <p>Capacity: {{ capacity }}</p>
+    <h2>Selected Items:</h2>
+    <ul>
+        {% for item in items_selected %}
+        <li>{{ item.name|default:"Item " }}{% if not item.name %} {{ forloop.counter }}{% endif %}</li>
+        {% endfor %}
+    </ul>
+    <p>Total Profit: {{ total_profit }}</p>
+    <button onclick="history.back()">Modify Items</button>
+    <button onclick="clearAndRedirect()">Solve Another Model</button>
+
+    <!-- Graph for Profit Distribution -->
+    <h3>Profit Distribution</h3>
+    <canvas id="myChart" width="400" height="300"></canvas>
+
+    <!-- Graph for Weight Distribution -->
+    <h3>Charge Distribution</h3>
+    <canvas id="weightChart" width="400" height="300"></canvas>
+
+    <script>
+        function clearAndRedirect() {
+            localStorage.removeItem('knapsack_capacity');
+            localStorage.removeItem('knapsack_weights');
+            localStorage.removeItem('knapsack_profits');
+            localStorage.removeItem('knapsack_required_items');
+            localStorage.removeItem('knapsack_names');
+            window.location.href = '/knapsack/';
+        }
+    </script>
+</body>
+</html>
